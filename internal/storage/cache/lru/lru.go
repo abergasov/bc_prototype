@@ -1,9 +1,9 @@
 package lru
 
 import (
+	"bc_prototype/internal/storage/cache/lru/utils"
 	"errors"
 	"fmt"
-	"go_project_template/internal/storage/cache/lru/utils"
 
 	lru "github.com/hashicorp/golang-lru"
 )

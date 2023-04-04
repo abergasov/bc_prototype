@@ -1,23 +1,27 @@
 package routes
 
 import (
-	"go_project_template/internal/logger"
-	"go_project_template/internal/service/sampler"
+	"bc_prototype/internal/logger"
+	"bc_prototype/internal/service/circle"
+
+	"github.com/google/uuid"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/zap"
 )
 
+var testCircle = uuid.MustParse("372e3c13-a552-4ebe-96fb-7f1bf45cf68c")
+
 type Server struct {
 	appAddr    string
 	log        logger.AppLogger
-	service    *sampler.Service
+	service    *circle.Service
 	httpEngine *fiber.App
 }
 
 // InitAppRouter initializes the HTTP Server.
-func InitAppRouter(log logger.AppLogger, service *sampler.Service, address string) *Server {
+func InitAppRouter(log logger.AppLogger, service *circle.Service, address string) *Server {
 	app := &Server{
 		appAddr:    address,
 		httpEngine: fiber.New(fiber.Config{}),
@@ -33,6 +37,13 @@ func (s *Server) initRoutes() {
 	s.httpEngine.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("pong")
 	})
+	apiGroup := s.httpEngine.Group("/api")
+	{
+		apiGroup.Get("/members", s.listOfMembers)
+		apiGroup.Post("/members", s.saveMemberAddress)
+		apiGroup.Get("/circle/:circleID/contract", s.getCircleContract)
+		apiGroup.Post("/circle/:circleID/contract", s.deployContract)
+	}
 }
 
 // Run starts the HTTP Server.

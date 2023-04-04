@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bc_prototype/internal/config"
+	"bc_prototype/internal/logger"
+	"bc_prototype/internal/repository/contract"
+	membersRepo "bc_prototype/internal/repository/members"
+	"bc_prototype/internal/routes"
+	circleService "bc_prototype/internal/service/circle"
+	"bc_prototype/internal/storage/database"
 	"flag"
 	"fmt"
-	"go_project_template/internal/config"
-	"go_project_template/internal/logger"
-	samplerRepo "go_project_template/internal/repository/sampler"
-	"go_project_template/internal/routes"
-	samplerService "go_project_template/internal/service/sampler"
-	"go_project_template/internal/storage/database"
 	"log"
 	"os"
 	"os/signal"
@@ -47,10 +48,11 @@ func main() {
 	}()
 
 	appLog.Info("init repositories")
-	repo := samplerRepo.InitRepo(dbConn)
+	repoMembers := membersRepo.InitRepo(dbConn)
+	repoContract := contract.InitRepo(dbConn)
 
 	appLog.Info("init services")
-	service := samplerService.InitService(appLog, repo)
+	service := circleService.InitService(appLog, repoMembers, repoContract)
 
 	appLog.Info("init http service")
 	appHTTPServer := routes.InitAppRouter(appLog, service, fmt.Sprintf(":%d", appConf.AppPort))

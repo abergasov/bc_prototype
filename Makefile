@@ -1,4 +1,4 @@
-PROJECT_NAME:=sampler
+PROJECT_NAME:=bc_prototype
 FILE_HASH := $(shell git rev-parse HEAD)
 GOLANGCI_LINT := $(shell command -v golangci-lint 2> /dev/null)
 
@@ -60,6 +60,8 @@ run: ## Runs binary local with environment in docker
 migrate_new: ## Create new migration
 	migrate create -ext sql -dir migrations -seq data
 
+migrate:
+	migrate -path migrations/ -database "postgres://aHAjeK:AOifjwelmc8dw@127.0.0.1:5249/sybill?sslmode=disable" up
 
 .PHONY: help install-lint test gogen lint stop dev_up build run init_repo migrate_new
 .DEFAULT_GOAL := help
