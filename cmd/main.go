@@ -52,7 +52,10 @@ func main() {
 	repoContract := contract.InitRepo(dbConn)
 
 	appLog.Info("init services")
-	service := circleService.InitService(appLog, repoMembers, repoContract)
+	service, err := circleService.InitService(appLog, appConf.AlchemyRPC, repoMembers, repoContract)
+	if err != nil {
+		appLog.Fatal("unable to init service", err)
+	}
 
 	appLog.Info("init http service")
 	appHTTPServer := routes.InitAppRouter(appLog, service, fmt.Sprintf(":%d", appConf.AppPort))
