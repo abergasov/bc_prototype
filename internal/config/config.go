@@ -14,6 +14,7 @@ type AppConfig struct {
 	MigratesFolder string    `yaml:"migrates_folder"`
 	ConfigDB       DBConf    `yaml:"conf_db"`
 	ConfigGraph    GraphConf `yaml:"conf_graph"`
+	AlchemyRPC     string    `yaml:"alchemy_rpc"`
 }
 
 type GraphConf struct {

@@ -19,7 +19,9 @@ create table circle_contract
     circle_id        uuid
         constraint circle_contract_pk
             primary key,
-    contract_address varchar
+    contract_address varchar,
+    deploy_hash varchar,
+    created_at timestamp
 );
 
 alter table circle_members

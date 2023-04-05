@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-contract CircleContract {
+contract CircleStorage {
 
     struct CircleMember {
         uint256 totalSeedsAmount;
@@ -17,13 +17,13 @@ contract CircleContract {
 
     uint256 public constant TOTAL_SEEDS = 1000;
 
-    constructor(address _circleDirector, bytes16 _circleID) {
+    constructor(bytes16 _circleID) {
         CIRCLE_ADDRESS = _circleID;
-        nameToSeedsAmount[_circleDirector] = TOTAL_SEEDS;
-       // seedsOwners.push(_circleDirector);
-    }
-
-    function circle() public view returns (bytes16)  {
-        return CIRCLE_ADDRESS;
+        nameToSeedsAmount[msg.sender] = TOTAL_SEEDS;
+//        CircleMember memory member = CircleMember({
+//            totalSeedsAmount: TOTAL_SEEDS,
+//            member: msg.sender
+//        });
+//        seedsOwners.push(member);
     }
 }

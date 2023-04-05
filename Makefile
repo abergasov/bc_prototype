@@ -65,9 +65,12 @@ migrate:
 	migrate -path migrations/ -database "postgres://aHAjeK:AOifjwelmc8dw@127.0.0.1:5249/sybill?sslmode=disable" up
 
 compile_contract:
-	docker run --rm -v $(PWD):/contracts $(SOLC_DOCKER_IMAGE) \
-            --bin --abi /contracts/internal/service/circle/CircleStorage.sol -o /contracts/internal/service/circle/ \
+	docker run --rm -v $(PWD)/internal/contracts:/contracts $(SOLC_DOCKER_IMAGE) \
+            --bin --abi /contracts/CircleStorage.sol -o /contracts \
             --overwrite
+
+	#docker run --rm -v $(PWD)/internal/service/circle:/abi ethereum/client-go abigen --abi /abi/CircleContract.abi --pkg service --out /abi/circle_contract.go
+	abigen --bin=$(PWD)/internal/contracts/CircleStorage.bin --abi $(PWD)/internal/contracts/CircleStorage.abi --pkg contracts --out $(PWD)/internal/contracts/circle_contract.go
 
 .PHONY: help install-lint test gogen lint stop dev_up build run init_repo migrate_new
 .DEFAULT_GOAL := help

@@ -3,6 +3,7 @@ package members
 import (
 	"bc_prototype/internal/model"
 	"bc_prototype/internal/storage/database"
+	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -20,6 +21,12 @@ func (r *Repo) GetMemberByID(circleID, memberID uuid.UUID) (*model.Member, error
 	var res model.Member
 	err := r.db.Client().QueryRowx("SELECT * FROM circle_members WHERE circle_id = $1 AND member_id = $2", circleID, memberID).StructScan(&res)
 	return &res, err
+}
+
+func (r *Repo) GetDirectorsAddress(circleID uuid.UUID) (string, error) {
+	var address sql.NullString
+	err := r.db.Client().QueryRowx("SELECT address FROM circle_members WHERE circle_id = $1 AND role = 3", circleID).Scan(&address)
+	return address.String, err
 }
 
 func (r *Repo) GetCircleMembers(circleID uuid.UUID) ([]*model.Member, error) {
