@@ -43,6 +43,8 @@ func (s *Server) initRoutes() {
 		apiGroup.Post("/members", s.saveMemberAddress)
 		apiGroup.Get("/circle/:circleID/contract", s.getCircleContract)
 		apiGroup.Post("/circle/:circleID/contract", s.deployContract)
+		// reset state
+		apiGroup.Get("/reset", s.dropAll)
 	}
 }
 
@@ -54,4 +56,8 @@ func (s *Server) Run() error {
 
 func (s *Server) Stop() error {
 	return s.httpEngine.Shutdown()
+}
+
+func (s *Server) dropAll(_ *fiber.Ctx) error {
+	return s.service.EraseAll()
 }

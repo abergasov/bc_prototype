@@ -23,3 +23,8 @@ func (r *Repo) GetCircleContract(circleID uuid.UUID) (string, error) {
 	}
 	return contractAddress, err
 }
+
+func (r *Repo) EraseAll() error {
+	_, err := r.db.Client().Exec("DELETE FROM circle_contract")
+	return err
+}

@@ -1,6 +1,7 @@
 PROJECT_NAME:=bc_prototype
 FILE_HASH := $(shell git rev-parse HEAD)
 GOLANGCI_LINT := $(shell command -v golangci-lint 2> /dev/null)
+SOLC_DOCKER_IMAGE=ethereum/solc:stable
 
 init_repo: ## create necessary configs
 	cp configs/sample.common.env configs/common.env
@@ -62,6 +63,11 @@ migrate_new: ## Create new migration
 
 migrate:
 	migrate -path migrations/ -database "postgres://aHAjeK:AOifjwelmc8dw@127.0.0.1:5249/sybill?sslmode=disable" up
+
+compile_contract:
+	docker run --rm -v $(PWD):/contracts $(SOLC_DOCKER_IMAGE) \
+            --bin --abi /contracts/internal/service/circle/CircleStorage.sol -o /contracts/internal/service/circle/ \
+            --overwrite
 
 .PHONY: help install-lint test gogen lint stop dev_up build run init_repo migrate_new
 .DEFAULT_GOAL := help

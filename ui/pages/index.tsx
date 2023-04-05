@@ -7,8 +7,9 @@ import Member = models.Member
 import Layout from "../components/Layout"
 import SingleMember from "../components/circle/SingleMember"
 import { setMemberAddress } from "../data/member_cruds"
-import {deployCircleContract, deployContract, getCircleContract} from "../data/contract"
+import { deployCircleContract, getCircleContract } from "../data/contract"
 import CircleContract from "../components/circle/Contract"
+import { resetAppData } from "../data/app"
 
 const Home = () => {
 	const { chainId: chainIdHex, account: account, isWeb3Enabled, web3: provider } = useMoralis()
@@ -60,6 +61,12 @@ const Home = () => {
 		await refetchMembers()
 	}
 
+	const resetApp = async () => {
+		resetAppData()
+		await refetchMembers()
+		await refetchContract()
+	}
+
 	const allData = useMemo(() => {
 		return membersList?.pages.flatMap((page) => page)
 	}, [membersList])
@@ -72,7 +79,7 @@ const Home = () => {
 	return (
 		<Layout title="Home" backRoute="/">
 			<VStack spacing={6} width="100%">
-				<CircleContract contractAddress={circleContract} deploy={deployContract} />
+				<CircleContract contractAddress={circleContract} deploy={deployContract} reset={resetApp} />
 				<VStack boxShadow="0px 2px 8px #ccc" p={4} borderRadius={6} width="100%" align="flex-start">
 					{!membersList && (
 						<Stack width="100%">

@@ -45,3 +45,8 @@ func (r *Repo) SetMemberAddress(memberID uuid.UUID, address string) error {
 	_, err := r.db.Client().Exec("UPDATE circle_members SET address = $1 WHERE member_id = $2", address, memberID)
 	return err
 }
+
+func (r *Repo) EraseAll() error {
+	_, err := r.db.Client().Exec("UPDATE circle_members SET address = NULL")
+	return err
+}
