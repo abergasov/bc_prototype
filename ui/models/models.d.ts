@@ -5,4 +5,14 @@ declare module models {
 		address: string
 		role: number
 	}
+	export interface CircleContract {
+		contract_abi: string
+		contract_code: string
+		params: string[]
+	}
+	export interface DeployedCircleContract {
+		contract_address: string
+		transaction_hash: string
+		date: string
+	}
 }

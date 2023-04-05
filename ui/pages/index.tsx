@@ -7,27 +7,14 @@ import Member = models.Member
 import Layout from "../components/Layout"
 import SingleMember from "../components/circle/SingleMember"
 import { setMemberAddress } from "../data/member_cruds"
-import { deployCircleContract, getCircleContract } from "../data/contract"
+import {deployCircleContract, getCircleContract, saveContract} from "../data/contract"
 import CircleContract from "../components/circle/Contract"
 import { resetAppData } from "../data/app"
+import Web3 from "web3";
+import DeployedCircleContract = models.DeployedCircleContract;
 
 const Home = () => {
-	const { chainId: chainIdHex, account: account, isWeb3Enabled, web3: provider } = useMoralis()
-	const chainId: string = parseInt(chainIdHex!).toString()
-
-	// if (isWeb3Enabled) {
-	// 	console.log("web3 enabled", account)
-	// 	let balacne = ""
-	// 	provider?.getBalance(account).then((balance) => {
-	// 		balacne = balance
-	// 		console.log("balance", balance.toString())
-	// 	})
-	// 	console.log("balance", balacne)
-	// }
-	//if (!isWeb3Enabled) return <Button onClick={() => provider.enable()}>Connect</Button>
-	//const balance = provider.account.getNativeBalance()
-	//const address = "0x1..."
-	//const { data: nativeBalance } = useEvmNativeBalance({ address })
+	const { chainId: chainIdHex, account: account, isWeb3Enabled, web3: provider, Moralis: moralis } = useMoralis()
 	const { push } = useRouter()
 	const { data: membersList, refetch: refetchMembers } = useInfiniteQuery<Member[]>(
 		"feeds",
@@ -38,15 +25,50 @@ const Home = () => {
 		{}
 	)
 
-	const { data: contract, refetch: refetchContract } = useInfiniteQuery<string>(
+	const { data: contract, refetch: refetchContract } = useInfiniteQuery<DeployedCircleContract>(
 		"contract",
-		async () => getCircleContract(),
+		async () => {
+			const data: DeployedCircleContract = await getCircleContract()
+			return data
+		},
 		{}
 	)
 
 	const deployContract = async () => {
 		console.log("deploy_")
-		await deployCircleContract()
+		if (!provider) {
+			return
+		}
+		if (!account) {
+			return
+		}
+		let web3 = new Web3(provider.provider);
+		const deployParams = await deployCircleContract()
+
+
+		let contract = new web3.eth.Contract(JSON.parse(deployParams.contract_abi));
+		const params = web3.utils.fromAscii("123")
+
+		contract.options.data = deployParams.contract_code;
+		const deployTx = await contract.deploy({
+			data: deployParams.contract_code,
+			arguments: [params],
+		})
+		const gas = await deployTx.estimateGas()
+		console.log("gas", gas)
+		let txHash = ""
+		const deployedContract = await deployTx
+			.send({
+				from: account,
+				gas: gas,
+			})
+			.once("transactionHash", (txhash) => {
+				console.log(`Mining deployment transaction ...`);
+				console.log(`https://goerli.etherscan.io/tx/${txhash}`);
+				txHash = txhash
+			});
+		console.log(deployedContract.options.address)
+		await saveContract(deployedContract.options.address, txHash)
 		await refetchContract()
 	}
 
@@ -62,7 +84,7 @@ const Home = () => {
 	}
 
 	const resetApp = async () => {
-		resetAppData()
+		await resetAppData()
 		await refetchMembers()
 		await refetchContract()
 	}
@@ -71,15 +93,17 @@ const Home = () => {
 		return membersList?.pages.flatMap((page) => page)
 	}, [membersList])
 
-	const circleContract = useMemo(() => {
-		console.log("contract", contract)
-		return contract?.address?.toString() ?? ""
+	const deployedContract = useMemo(() => {
+		if (!contract) {
+			return {}
+		}
+		return contract?.pages?.length > 0 ? contract?.pages[0] : null
 	}, [contract])
 
 	return (
 		<Layout title="Home" backRoute="/">
 			<VStack spacing={6} width="100%">
-				<CircleContract contractAddress={circleContract} deploy={deployContract} reset={resetApp} />
+				<CircleContract {...deployedContract} deploy={deployContract} reset={resetApp} />
 				<VStack boxShadow="0px 2px 8px #ccc" p={4} borderRadius={6} width="100%" align="flex-start">
 					{!membersList && (
 						<Stack width="100%">
